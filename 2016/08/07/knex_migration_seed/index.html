@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>postgreSQL with knex.js (1) - migrate and seed | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-08-07
+  </p>
+  <h1 class="post--title">postgreSQL with knex.js (1) - migrate and seed</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/postgreSQL/">
+            postgreSQL
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/Knex-js/">
+            Knex.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/database/">
+            database
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p><code>knex.js</code>は<code>SQL QueryBuilder</code>。これで<code>postgreSQL</code>を操作する。マイグレーションとシードでテーブルとテストデータを作るところから。</p>
+<h2 id="インストールする"><a href="#インストールする" class="headerlink" title="インストールする"></a>インストールする</h2><p><code>knex</code>と<code>pg</code>をインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install knex pg --save</span><br></pre></td></tr></table></figure>
+<p>CLIで操作をするこになるのでグローバルにもインストールする。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install knex -g</span><br></pre></td></tr></table></figure></p>
+<p>別途<code>postgreSQL</code>のインストールが必要。<code>postgreSQL</code>と<code>pg</code>については、<a href="http://hikonaz.com/2016/07/postgresql/" target="_blank" rel="noopener">node.js &amp; postgreSQL</a>を参照。</p>
+<h2 id="テーブルを作って壊して作る"><a href="#テーブルを作って壊して作る" class="headerlink" title="テーブルを作って壊して作る"></a>テーブルを作って壊して作る</h2><p><code>knex.js</code>のチュートリアル的なポストをみると、<code>express</code>をインストールして・・。みたいな話になるけれど。まずは、データを作って壊して再建するとこまで。<br>ここでの<code>File Structure</code>は以下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/</span><br><span class="line">├── migrations....生成されたmigrationファイルが格納される</span><br><span class="line">├── knexfile.js...knexの設定ファイル</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+<h3 id="Create-DB"><a href="#Create-DB" class="headerlink" title="Create DB"></a>Create DB</h3><p>データベースを作成。ブログのデータベースを作ることにする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">createdb blogdev</span><br></pre></td></tr></table></figure>
+<h3 id="knexfile-js"><a href="#knexfile-js" class="headerlink" title="knexfile.js"></a>knexfile.js</h3><p>knexfile.jsはクライアント、環境、使うデータベースを管理する設定ファイル。ここでは<code>development</code>のみを設定する。</p>
+<figure class="highlight javascript"><figcaption><span>knexfile.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  development: &#123;</span><br><span class="line">    client: <span class="string">'postgresql'</span>,</span><br><span class="line">    connection: &#123;</span><br><span class="line">      database: <span class="string">'blogdev'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="マイグレーションファイルを作る"><a href="#マイグレーションファイルを作る" class="headerlink" title="マイグレーションファイルを作る"></a>マイグレーションファイルを作る</h3><p>これでデータベースの設定は完了。続いてマイグレーションファイルを作る。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ knex migrate:make blog</span><br></pre></td></tr></table></figure>
+<p><code>blog</code>の部分は、なんでもオッケー。マイグレーションファイルの操作内容がわかるネーミングで。<br><code>migrations</code>に<code>timestamp_blog.js</code>というマイグレーションファイルが出力される。</p>
+<figure class="highlight javascript"><figcaption><span>migrations/20160805114402_blog.js</span></figcaption><table><tr><td class="code"><pre><span class="line">exports.up = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;</span><br><span class="line">&#125;;</span><br><span class="line">exports.down = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>exports.up</code>と<code>exports.down</code>はそれぞれ、DBに実行する操作と取り消す操作を入れる。</p>
+<p><code>exports.up</code>にフィールド<code>id</code>,<code>title</code>,<code>body</code>,<code>postDate</code>を持つテーブル<code>posts</code>を追加する操作を入れる。</p>
+<figure class="highlight javascript"><figcaption><span>migrations/20160805114402_blog.js</span></figcaption><table><tr><td class="code"><pre><span class="line">exports.up = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">        knex.schema.createTable(<span class="string">'posts'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">table</span>)</span>&#123;</span><br><span class="line">            table.increments(<span class="string">'id'</span>).primary();</span><br><span class="line">            table.string(<span class="string">'title'</span>);</span><br><span class="line">            table.string(<span class="string">'body'</span>);</span><br><span class="line">            table.dateTime(<span class="string">'postDate'</span>);</span><br><span class="line">        &#125;),</span><br><span class="line">    ])</span><br><span class="line">&#125;;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p><code>exports.down</code>にはテーブル<code>posts</code>をドロップする操作を入れる。</p>
+<figure class="highlight javascript"><figcaption><span>migrations/20160805114402_blog.js</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">exports.down = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">        knex.schema.dropTable(<span class="string">'posts'</span>)</span><br><span class="line">    ])</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="マイグレーションを実行する"><a href="#マイグレーションを実行する" class="headerlink" title="マイグレーションを実行する"></a>マイグレーションを実行する</h3><p>操作を追加したマイグレーションファイルを使う。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ knex migrate:latest</span><br></pre></td></tr></table></figure>
+<p>もっとも新しいマイグレーションファイル(さっき<code>up</code>と<code>down</code>を入力したファイル)をもとにテーブルが作成される。確認してみる。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql blogdev</span><br><span class="line">blogdev=<span class="comment"># \d posts</span></span><br></pre></td></tr></table></figure>
+<p>テーブルをドロップして確認してみる。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ knex migrate:rollback</span><br></pre></td></tr></table></figure></p>
+<p>余談だけどデータベースの確認は<code>gui</code>ツールが便利だと思う。</p>
+<h2 id="テストデータを作る"><a href="#テストデータを作る" class="headerlink" title="テストデータを作る"></a>テストデータを作る</h2><p>さっき作ったテーブルにテストデータを入力していく。<code>rollback</code>したままになっているなら<code>$ knex migrate:latest</code>しなおす。</p>
+<h3 id="ファイル構造"><a href="#ファイル構造" class="headerlink" title="ファイル構造"></a>ファイル構造</h3><p>新しいファイル構造は以下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/</span><br><span class="line">├── migrations....生成されたmigrationファイルが格納される</span><br><span class="line">├── seeds.........生成されたseedファイルが格納される</span><br><span class="line">├── knexfile.js...knexの設定ファイル</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+<h3 id="シードファイルの作成"><a href="#シードファイルの作成" class="headerlink" title="シードファイルの作成"></a>シードファイルの作成</h3><p>テストデータの作成は<code>knex</code>の<code>seed</code>を使う。シードファイルを作成。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">knex seed:make posts</span><br></pre></td></tr></table></figure>
+<p><code>posts</code>の部分は生成されるシードファイル名。任意のものを入れる。<br><code>seeed/post.js</code>が生成される。</p>
+<figure class="highlight javascript"><figcaption><span>seed/post.js</span></figcaption><table><tr><td class="code"><pre><span class="line">exports.seed = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Deletes ALL existing entries</span></span><br><span class="line">  <span class="keyword">return</span> knex(<span class="string">'table_name'</span>).del()</span><br><span class="line">    .then(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="built_in">Promise</span>.all([</span><br><span class="line">        <span class="comment">// Inserts seed entries</span></span><br><span class="line">        knex(<span class="string">'table_name'</span>).insert(&#123;<span class="attr">id</span>: <span class="number">1</span>, <span class="attr">colName</span>: <span class="string">'rowValue1'</span>&#125;),</span><br><span class="line">        knex(<span class="string">'table_name'</span>).insert(&#123;<span class="attr">id</span>: <span class="number">2</span>, <span class="attr">colName</span>: <span class="string">'rowValue2'</span>&#125;),</span><br><span class="line">        knex(<span class="string">'table_name'</span>).insert(&#123;<span class="attr">id</span>: <span class="number">3</span>, <span class="attr">colName</span>: <span class="string">'rowValue3'</span>&#125;)</span><br><span class="line">      ]);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>ここにテストデータを入れていく。</p>
+<figure class="highlight javascript"><figcaption><span>seed/post.js</span></figcaption><table><tr><td class="code"><pre><span class="line">exports.seed = <span class="function"><span class="keyword">function</span>(<span class="params">knex, Promise</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> table = <span class="string">'posts'</span>;</span><br><span class="line">  <span class="keyword">return</span> knex(table).del() <span class="comment">// Deletes ALL existing entries</span></span><br><span class="line">    .then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="comment">// Inserts seed entries one by one in series</span></span><br><span class="line">      <span class="keyword">return</span> knex(table).insert(&#123;</span><br><span class="line">        title: <span class="string">'昼食をとった'</span>,</span><br><span class="line">        body: <span class="string">'ラーメンとライスを食べた。美味しかった。'</span>,</span><br><span class="line">        postDate:<span class="string">'2016-08-01 13:30:00'</span></span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> knex(table).insert(&#123;</span><br><span class="line">        title: <span class="string">'昼寝をした'</span>,</span><br><span class="line">        body: <span class="string">'起きたら夜になった。悲しかった。'</span>,</span><br><span class="line">        postDate:<span class="string">'2016-08-01 20:10:00'</span></span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> knex(table).insert(&#123;</span><br><span class="line">        title: <span class="string">'眠くならない'</span>,</span><br><span class="line">        body: <span class="string">'眠れない。明日が辛い。'</span>,</span><br><span class="line">        postDate:<span class="string">'2016-08-02 04:00:00'</span></span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>複数のデータを入れるのに<code>promise</code>を使っている。seedファイルを実行するたびに同じ順番でデータベースにはいる。</p>
+<h3 id="シードファイルの実行"><a href="#シードファイルの実行" class="headerlink" title="シードファイルの実行"></a>シードファイルの実行</h3><p>シードファイルを作ったら実行する。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ knex seed:run</span><br></pre></td></tr></table></figure>
+<p>テーブルを空っぽにしてからデータが入る。確認してみよう。</p>
+<h2 id="knexfile-jsの設定"><a href="#knexfile-jsの設定" class="headerlink" title="knexfile.jsの設定"></a>knexfile.jsの設定</h2><p>上記の手順では、<code>seed</code>と<code>migrations</code>はデフォルトのディレクトリを使った。knexfile.jsから任意のディレクトリを指定することもできる。<br>また<code>test</code>と<code>development</code>のデータベースを分けたりもできる。</p>
+<figure class="highlight javascript"><figcaption><span>knexfile.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  test: &#123;</span><br><span class="line">    client: <span class="string">'postgresql'</span>,</span><br><span class="line">    connection: &#123;</span><br><span class="line">      database: <span class="string">'blogtest'</span></span><br><span class="line">    &#125;</span><br><span class="line">    migrations: &#123;</span><br><span class="line">      directory: <span class="string">'/db/migrations'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    seeds: &#123;</span><br><span class="line">      directory: <span class="string">'/db/seeds/test'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  development: &#123;</span><br><span class="line">    client: <span class="string">'postgresql'</span>,</span><br><span class="line">    connection: &#123;</span><br><span class="line">      database: <span class="string">'blogdev'</span></span><br><span class="line">    &#125;</span><br><span class="line">    migrations: &#123;</span><br><span class="line">      directory: <span class="string">'/db/migrations'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    seeds: &#123;</span><br><span class="line">      directory: <span class="string">'/db/seeds/dev'</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="課題と疑問"><a href="#課題と疑問" class="headerlink" title="課題と疑問"></a>課題と疑問</h2><ul>
+<li><code>$ knex seed:run</code>を繰り返すとIDがどんどん進んでいく。別にいいんだけど、なんかきもい。</li>
+<li>複数のデータを<code>seed file</code>に入れるのに<code>then</code>を使うべきなのか。</li>
+</ul>
+<h2 id="Refferences"><a href="#Refferences" class="headerlink" title="Refferences"></a>Refferences</h2><ul>
+<li><a href="http://knexjs.org" target="_blank" rel="noopener">knex.js</a></li>
+<li><a href="http://mherman.org/blog/2016/04/28/test-driven-development-with-node" target="_blank" rel="noopener">Test Driven Development With Node, Postgres, and Knex (Red/Green/Refactor)</a></li>
+<li><a href="http://qiita.com/YoshiyukiKato/items/59c9ac742536d706b322" target="_blank" rel="noopener">【JavaScriptでもSQLしたい！】気がつくとそこはKnex.jsという名の天竺だった</a></li>
+<li><a href="http://www.dancorman.com/knex-your-sql-best-friend/" target="_blank" rel="noopener">Knex, your SQL best friend.</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

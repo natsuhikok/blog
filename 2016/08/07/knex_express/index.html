@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>postgreSQL with knex.js (2) - queries | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-08-07
+  </p>
+  <h1 class="post--title">postgreSQL with knex.js (2) - queries</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/express-js/">
+            express.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/knex-js/">
+            knex.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/postgreSQL/">
+            postgreSQL
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p><a href="http://hikonaz.com/2016/08/knex_migration_seed/" target="_blank" rel="noopener">postgreSQL with knex.js (1) - migrate and seed</a>の続き。expressでknex.jsのクエリビルダーを使う。</p>
+<h2 id="ファイル構造"><a href="#ファイル構造" class="headerlink" title="ファイル構造"></a>ファイル構造</h2><p>全体のファイル構造はこんなかんじ。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/</span><br><span class="line">├── migrations</span><br><span class="line">│    └── timestamp_blog.js</span><br><span class="line">├── seeds</span><br><span class="line">│    └── posts.js</span><br><span class="line">├── views</span><br><span class="line">│    ├── index.jade</span><br><span class="line">│    ├── post.jade</span><br><span class="line">│    └── posted.jade</span><br><span class="line">├── app.js</span><br><span class="line">├── db.js</span><br><span class="line">├── queries.js</span><br><span class="line">├── knexfile.js</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+<h2 id="express-js"><a href="#express-js" class="headerlink" title="express.js"></a>express.js</h2><p><code>express.js</code>の準備する。テンプレートエンジンは、<code>jade</code>を使うので<code>express</code>と<code>jade</code>をインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install --save express jade</span><br></pre></td></tr></table></figure>
+<p>まずは<code>express</code>が動くところまで作る。</p>
+<figure class="highlight javascript"><figcaption><span>app.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> app = express();</span><br><span class="line"><span class="keyword">var</span> port = <span class="number">4000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// views</span></span><br><span class="line">app.set(<span class="string">'views'</span>, <span class="string">'./views'</span>);</span><br><span class="line">app.set(<span class="string">'view engine'</span>, <span class="string">'jade'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line"><span class="comment">// index.page</span></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line">app.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  res.render(</span><br><span class="line">    <span class="string">'index'</span>,</span><br><span class="line">    &#123;</span><br><span class="line">      title : <span class="string">'express!'</span></span><br><span class="line">    &#125;</span><br><span class="line">  );</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.listen(port, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"Listening on port"</span>, port);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><figcaption><span>views/index.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title= title</span><br><span class="line">  body</span><br><span class="line">    h1= title</span><br><span class="line">    p Welcome to #&#123;title&#125;</span><br></pre></td></tr></table></figure>
+<p>これで、viewとappの準備ができたので、express serverを起動してみる。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ node app.js</span><br></pre></td></tr></table></figure>
+<p><a href="http://localhost:4000/" target="_blank" rel="noopener">http://localhost:4000/</a>にアクセスすると<code>Welcome to express!</code>がでてくるはず。</p>
+<h2 id="GET-all-posts"><a href="#GET-all-posts" class="headerlink" title="GET all posts"></a>GET all posts</h2><p>knexのQuery Builderを使って、<code>express</code>から<code>postgreSQL</code>にアクセスして<code>post</code>テーブルのデータを取得する。<br>途中で気づいたのだけれど、GET/POSTに対して、postテーブル分かりづらい・・。</p>
+<p>データベースの設定をする。</p>
+<figure class="highlight javascript"><figcaption><span>db.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> config      = <span class="built_in">require</span>(<span class="string">'./knexfile.js'</span>);</span><br><span class="line"><span class="keyword">var</span> env         = <span class="string">'development'</span>;</span><br><span class="line"><span class="keyword">var</span> knex        = <span class="built_in">require</span>(<span class="string">'knex'</span>)(config[env]);</span><br><span class="line"><span class="built_in">module</span>.exports = knex;</span><br></pre></td></tr></table></figure>
+<p>queriesを作る。<br><figure class="highlight javascript"><figcaption><span>queries.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> knex = <span class="built_in">require</span>(<span class="string">'./db.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">posts</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> knex(<span class="string">'posts'</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="comment">// queries</span></span><br><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="keyword">var</span> queries = &#123;</span><br><span class="line">  getAllPosts: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().select();</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">module</span>.exports = queries;</span><br></pre></td></tr></table></figure></p>
+<p>app.jsを編集して、indexページにアクセスするとconsoleにデータベースから受け取ったデータを表示できるようにする。</p>
+<figure class="highlight javascript"><figcaption><span>app.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> app     = express();</span><br><span class="line"><span class="keyword">var</span> queries = <span class="built_in">require</span>(<span class="string">'./queries.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> port = <span class="number">4000</span>;</span><br><span class="line"></span><br><span class="line">...(中略)</span><br><span class="line"></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line"><span class="comment">// index page</span></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line">app.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  queries.getAllPosts()</span><br><span class="line">  .then(<span class="function"><span class="keyword">function</span>(<span class="params">posts</span>) </span>&#123;</span><br><span class="line">    res.render(</span><br><span class="line">      <span class="string">'index'</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        title : <span class="string">'express!'</span>,</span><br><span class="line">        posts : <span class="string">'post'</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    )</span><br><span class="line">    <span class="built_in">console</span>.log(posts);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>サーバーを起動してindex pageにアクセスしてターミナル(ブラウザのコンソールじゃなくてターミナル)を確認。データベースの全記事が出力されていることを確認する。</p>
+<p>正しく出力されていることを確認したらviewに表示できるようにする。<br><figure class="highlight plain"><figcaption><span>views/index.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title= title</span><br><span class="line">  body</span><br><span class="line">    - each key in posts</span><br><span class="line">      ul</span><br><span class="line">        li #&#123;key.title&#125;</span><br><span class="line">        li #&#123;key.body&#125;</span><br><span class="line">        li #&#123;key.postDate&#125;</span><br></pre></td></tr></table></figure></p>
+<p>サーバーを起動してindex pageにアクセスすると取得したデータが表示されているはず。</p>
+<h2 id="GET-single-post"><a href="#GET-single-post" class="headerlink" title="GET single post"></a>GET single post</h2><p>次は、個別記事ページを作る。全体記事から個別記事へのリンクがあるかんじ。<br>idから個別記事を取得するクエリを追加。</p>
+<figure class="highlight javascript"><figcaption><span>queries.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="comment">// queries</span></span><br><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="keyword">var</span> queries = &#123;</span><br><span class="line">  getAllPosts: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().select();</span><br><span class="line">  &#125;,</span><br><span class="line">  getPost: <span class="function"><span class="keyword">function</span>(<span class="params">postID</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().where(<span class="string">'id'</span>, <span class="built_in">parseInt</span>(postID)).first();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>個別記事ページを作る。</p>
+<figure class="highlight javascript"><figcaption><span>app.js</span></figcaption><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line"><span class="comment">// single posts</span></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line">app.get(<span class="string">'/posts/:id'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  queries.getPost(req.params.id)</span><br><span class="line">  .then(<span class="function"><span class="keyword">function</span>(<span class="params">post</span>) </span>&#123;</span><br><span class="line">    res.render(</span><br><span class="line">      <span class="string">'post'</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        post : post,</span><br><span class="line">      &#125;</span><br><span class="line">    )</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>viewを編集する。全体記事から個別記事へのリンクを貼る。<code>&lt;a href=&quot;./posts/[id]&quot;&gt;&lt;/a&gt;</code>で<code>&lt;ul&gt;&lt;/ul&gt;</code>全体を囲うだけ。</p>
+<figure class="highlight plain"><figcaption><span>views/index.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title= title</span><br><span class="line">  body</span><br><span class="line">    - each post in posts</span><br><span class="line">      a(href=&quot;./posts/#&#123;post.id&#125;&quot;)</span><br><span class="line">        ul</span><br><span class="line">          li #&#123;post.title&#125;</span><br><span class="line">          li #&#123;post.body&#125;</span><br><span class="line">          li #&#123;post.postDate&#125;</span><br></pre></td></tr></table></figure>
+<p>個別記事ページのview。<br><figure class="highlight plain"><figcaption><span>views/post.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title #&#123;post.title&#125;</span><br><span class="line">  body</span><br><span class="line">    h1 #&#123;post.title&#125;</span><br><span class="line">    p #&#123;post.body&#125;</span><br><span class="line">    p #&#123;post.postDate&#125;</span><br></pre></td></tr></table></figure></p>
+<p>サーバーを起動してindex pageにアクセスすると各記事がリンクになっているのでクリックするとそれぞれの個別ページに移動する。</p>
+<h2 id="POST-post"><a href="#POST-post" class="headerlink" title="POST post"></a>POST post</h2><p>記事を投稿する。POSTを受け取るには<code>body-parser</code>がいるので、これをインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install --save body-parser</span><br></pre></td></tr></table></figure>
+<p>app.jsから<code>body-parser</code>を読み込む。</p>
+<figure class="highlight javascript"><figcaption><span>app.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">var</span> app     = express();</span><br><span class="line"><span class="keyword">var</span> queries = <span class="built_in">require</span>(<span class="string">'./queries.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> port = <span class="number">4000</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> bodyParser = <span class="built_in">require</span>(<span class="string">'body-parser'</span>);</span><br><span class="line">app.use(bodyParser.urlencoded(&#123;<span class="attr">extended</span>: <span class="literal">true</span>&#125;));</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>記事を追加するクエリを追加する。<br><figure class="highlight javascript"><figcaption><span>queries.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="comment">// queries</span></span><br><span class="line"><span class="comment">//////////////////////////</span></span><br><span class="line"><span class="keyword">var</span> queries = &#123;</span><br><span class="line">  getAllPosts: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().select();</span><br><span class="line">  &#125;,</span><br><span class="line">  getPost: <span class="function"><span class="keyword">function</span>(<span class="params">postID</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().where(<span class="string">'id'</span>, <span class="built_in">parseInt</span>(postID)).first();</span><br><span class="line">  &#125;,</span><br><span class="line">  addPost: <span class="function"><span class="keyword">function</span>(<span class="params">post</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> posts().insert(post, <span class="string">'id'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>app.jsにpostを追加する。’/posts’が受け取ってデータベースに追加する。追加したら新しく追加した記事を表示する。</p>
+<p>データベースのフィールドは<code>id</code>,<code>title</code>,<code>body</code>,<code>postDate</code>の３つ。<code>id</code>は自動、’title’,’body’はフォームからの入力。postDateは受け取ったあとapp.js内で追加してからデータベースに入れる。</p>
+<p>日付を扱うモジュールをインストールする。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install date-utils --save</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><figcaption><span>app.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line"><span class="comment">// Post post</span></span><br><span class="line"><span class="comment">///////////////////////////////////</span></span><br><span class="line">app.post(<span class="string">'/posts'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">require</span>(<span class="string">'date-utils'</span>);</span><br><span class="line">  <span class="keyword">var</span> newPost = req.body;</span><br><span class="line">  newPost.postDate = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">  queries.addPost(newPost)</span><br><span class="line">  .then(<span class="function"><span class="keyword">function</span>(<span class="params">postID</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> queries.getPost(postID);</span><br><span class="line">  &#125;)</span><br><span class="line">  .then(<span class="function"><span class="keyword">function</span>(<span class="params">post</span>) </span>&#123;</span><br><span class="line">    res.render(</span><br><span class="line">      <span class="string">'posted'</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        post : post,</span><br><span class="line">      &#125;</span><br><span class="line">    )</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>index pageにフォームを追加する。<br><figure class="highlight plain"><figcaption><span>views/index.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title= title</span><br><span class="line">  body</span><br><span class="line">    form(method=&quot;POST&quot;, action=&quot;./posts&quot;,target=&quot;_self&quot;)</span><br><span class="line">      span</span><br><span class="line">        | title</span><br><span class="line">        input(type=&quot;text&quot;, name=&quot;title&quot; value=&quot;title&quot;)</span><br><span class="line">      span</span><br><span class="line">        | content</span><br><span class="line">        input(type=&quot;text&quot;, name=&quot;body&quot; value=&quot;body&quot;)</span><br><span class="line">      input(type=&quot;submit&quot;, value=&quot;送信&quot;)</span><br><span class="line">    - each post in posts</span><br><span class="line">      a(href=&quot;./posts/#&#123;post.id&#125;&quot;)</span><br><span class="line">        ul</span><br><span class="line">          li #&#123;post.title&#125;</span><br><span class="line">          li #&#123;post.body&#125;</span><br><span class="line">          li #&#123;post.postDate&#125;</span><br></pre></td></tr></table></figure></p>
+<p>POST完了後に表示するviewも作る。<br><figure class="highlight plain"><figcaption><span>views/posted.jade</span></figcaption><table><tr><td class="code"><pre><span class="line">doctype html</span><br><span class="line">html</span><br><span class="line">  head</span><br><span class="line">    title #&#123;post.title&#125;</span><br><span class="line">  body</span><br><span class="line">    p posted!</span><br><span class="line">    h1 #&#123;post.title&#125;</span><br><span class="line">    p #&#123;post.body&#125;</span><br><span class="line">    p #&#123;post.postDate&#125;</span><br></pre></td></tr></table></figure></p>
+<p>サーバーを起動して、index pageのフォームを入力して送信するとデータベースにデータが追加されるはず。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://knexjs.org" target="_blank" rel="noopener">knex.js</a></li>
+<li><a href="http://mherman.org/blog/2016/04/28/test-driven-development-with-node/" target="_blank" rel="noopener">Test Driven Development With Node, Postgres, and Knex (Red/Green/Refactor)</a></li>
+<li><a href="https://expressjs.com/en/4x/api.html" target="_blank" rel="noopener">express 4.x API</a></li>
+<li><a href="http://expressjs.com/en/guide/routing.html" target="_blank" rel="noopener">Express Routing</a></li>
+<li><a href="https://www.postgresql.org/docs/9.1/static/datatype-datetime.html" target="_blank" rel="noopener">PostgreSQL: Documentation: 9.1: Date/Time Types</a></li>
+<li><a href="http://qiita.com/YoshiyukiKato/items/59c9ac742536d706b322" target="_blank" rel="noopener">【JavaScriptでもSQLしたい！】気がつくとそこはKnex.jsという名の天竺だった</a></li>
+<li><a href="http://qiita.com/K_ichi/items/c70bf4b08467717460d5" target="_blank" rel="noopener">ExpressでPOSTを処理するメモ</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

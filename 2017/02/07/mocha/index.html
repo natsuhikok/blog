@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>mochaでユニットテストを書く | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2017-02-07
+  </p>
+  <h1 class="post--title">mochaでユニットテストを書く</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/mocha/">
+            mocha
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p><code>mocha</code>を使って<code>javascript</code>をテストする。インストールからテストコード書くとこまで。</p>
+<h2 id="install"><a href="#install" class="headerlink" title="install"></a>install</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install -D mocha</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">$ npm install --global mocha</span><br></pre></td></tr></table></figure>
+<h2 id="基本的な使い方"><a href="#基本的な使い方" class="headerlink" title="基本的な使い方"></a>基本的な使い方</h2><ul>
+<li>テスト対象のコードを<code>require</code>する</li>
+<li><code>$ mocha</code> で<code>./test/*.js</code>のコードをテストする。グローバルインストール時のみ？</li>
+<li>describe &gt; it<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> func = <span class="built_in">require</span>(<span class="string">'./functions.js'</span>);</span><br><span class="line">describe(<span class="string">'計算'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> x = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">const</span> y = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">const</span> messageError = <span class="string">'誤答'</span>;</span><br><span class="line">    <span class="comment">// 足し算</span></span><br><span class="line">    it(<span class="string">'3 + 2'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (func.tasu(x,y) === <span class="number">5</span>) &#123;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(messageError);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 引き算</span></span><br><span class="line">    it(<span class="string">'3 - 2'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (func.hiku(x,y) === <span class="number">1</span>) &#123;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(messageError);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 掛け算</span></span><br><span class="line">    it(<span class="string">'3 * 2'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (func.kakeru(x,y) === <span class="number">6</span>) &#123;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(messageError);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="APIをテストする"><a href="#APIをテストする" class="headerlink" title="APIをテストする"></a>APIをテストする</h2><p><code>chai</code>と<code>chai-http</code>を使ってAPIのテストをする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ npm install --save-div chai chai-http</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> chai = <span class="built_in">require</span>(<span class="string">'chai'</span>);</span><br><span class="line"><span class="keyword">const</span> chaiHttp = <span class="built_in">require</span>(<span class="string">'chai-http'</span>);</span><br><span class="line"><span class="keyword">const</span> should = chai.should();</span><br><span class="line"></span><br><span class="line">chai.use(chaiHttp);</span><br><span class="line">describe(<span class="string">'Routing'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="string">'http://localhost:3000'</span>;</span><br><span class="line">  it(<span class="string">'should a message on / GET"'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">done</span>) </span>&#123;</span><br><span class="line">  chai.request(url)</span><br><span class="line">    .get(<span class="string">'/'</span>)</span><br><span class="line">    .end(<span class="function"><span class="keyword">function</span>(<span class="params">err, res</span>)</span>&#123;</span><br><span class="line">      res.body.message.should.equal(<span class="string">'This server is running.'</span>);</span><br><span class="line">      done();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">  it(<span class="string">'up comming test'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><ul>
+<li><a href="https://mochajs.org" target="_blank" rel="noopener">Mocha - the fun, simple, flexible JavaScript test framework</a></li>
+<li><a href="http://mherman.org/blog/2015/09/10/testing-node-js-with-mocha-and-chai" target="_blank" rel="noopener">Testing Node.js With Mocha and Chai</a></li>
+<li><a href="https://github.com/chaijs/chai-http" target="_blank" rel="noopener">chaijs/chai-http</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

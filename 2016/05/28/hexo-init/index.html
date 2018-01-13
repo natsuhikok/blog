@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>blogをpowered by Hexoにした。 | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-05-28
+  </p>
+  <h1 class="post--title">blogをpowered by Hexoにした。</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/javascript/">
+            javascript
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p><code>middleman blog</code>でgenerateして<code>github page</code>でホストしていたblogを<code>hexo</code>に代えた。ホストは、<code>github page</code>のまま。</p>
+<h2 id="why-hexo"><a href="#why-hexo" class="headerlink" title="why hexo"></a>why hexo</h2><p>blogの投稿自体を長いこと放置していたこともあって<code>middleman blog</code>の扱い方がさっぱりになっていた。普段触っている言語も<code>ruby</code>から<code>javascript</code>になっていたこともあって、<code>javascript</code>の<code>hexo</code>に乗り換えた。</p>
+<p>記事は、<code>markdown</code>で書いていたので簡単に移行できたのだけれど、独自の<code>front matter</code>を作っていたのでそこをどうするかで悩んだ。(結局捨てた)</p>
+<h2 id="hexo-command"><a href="#hexo-command" class="headerlink" title="hexo command"></a>hexo command</h2><p><code>hexo</code>でよく使いそうなコマンド。</p>
+<p>サーバーの起動。作成した記事を確認するときとか。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo s</span><br></pre></td></tr></table></figure></p>
+<p><code>draft</code>の記事を含めて確認することのが多いかも。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo s --draft</span><br></pre></td></tr></table></figure></p>
+<p>publicの生成。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo g</span><br><span class="line">$ hexo clean // publicフォルダを空にする</span><br></pre></td></tr></table></figure></p>
+<p>デプロイ。<code>_config.yml</code>で設定した<code>deploy</code>先にアップロードする。ぼくは、前と同じ<code>github page</code>の<code>user page</code>にしている。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br><span class="line"><span class="comment"># generate してそのまま deployする</span></span><br><span class="line">$ hexo deploy --generate</span><br></pre></td></tr></table></figure></p>
+<h2 id="hexo-markdown"><a href="#hexo-markdown" class="headerlink" title="hexo markdown"></a>hexo markdown</h2><p><code>hexo</code>独自のmarkdown基本が存在する。<code>code block</code>に<code>caption</code>をつけるのとか便利そう。(これしか知らない)<br><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">&#123;% codeblock this/is/caption.js lang:javascript %&#125;</span><br><span class="line">code...</span><br><span class="line">&#123;% endcodeblock %&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以下のようにキャプション付きのコードブロックになる。引越しを考えると積極的に使いたくない気もする。</p>
+<figure class="highlight javascript"><figcaption><span>gulp/sass.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="comment">//こんな感じにハイライトされる。</span></span><br><span class="line"><span class="keyword">const</span> gulp        = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">const</span> sass        = <span class="built_in">require</span>(<span class="string">'gulp-sass'</span>);</span><br><span class="line"><span class="keyword">const</span> plumber     = <span class="built_in">require</span>(<span class="string">'gulp-plumber'</span>);</span><br><span class="line"><span class="comment">/////////////////////////////////////////</span></span><br><span class="line"><span class="comment">// SCSS</span></span><br><span class="line"><span class="comment">/////////////////////////////////////////</span></span><br><span class="line">gulp.task(<span class="string">'sass'</span>, () =&gt; &#123;</span><br><span class="line">  gulp.src(<span class="string">'source/scss/**'</span>)</span><br><span class="line">    .pipe(plumber())</span><br><span class="line">    .pipe(sass(&#123;<span class="attr">outputStyle</span>: <span class="string">'compressed'</span>&#125;))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'source/css/'</span>))</span><br><span class="line">    .pipe(browsersync.reload(&#123;<span class="attr">stream</span>: <span class="literal">true</span>&#125;));</span><br><span class="line">&#125;);</span><br><span class="line">gulp.task(<span class="string">'watch'</span>, () =&gt; &#123;</span><br><span class="line">  gulp.watch([<span class="string">'source/scss/**'</span>],[<span class="string">'sass'</span>]);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="抱負"><a href="#抱負" class="headerlink" title="抱負"></a>抱負</h2><p>ちょくちょく更新していきたい。</p>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

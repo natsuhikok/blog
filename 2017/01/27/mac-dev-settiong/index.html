@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>新しいMacbookを買ったの開発環境を作った | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2017-01-27
+  </p>
+  <h1 class="post--title">新しいMacbookを買ったの開発環境を作った</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/cli/">
+            cli
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/mac/">
+            mac
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/zsh/">
+            zsh
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p>Macbookを買ったのでその設定とかやってた。</p>
+<h2 id="キーボードの設定"><a href="#キーボードの設定" class="headerlink" title="キーボードの設定"></a>キーボードの設定</h2><p>USキーボードなので日本語入力をできるようにする。<code>google日本語入力</code>をインストールしてみたけど、なぜか動かなかったのでデフォルトの日本語入力を使う。</p>
+<p>以前は外付けキーボードの設定に<code>karabiner</code>を使ったいたのだけど、<code>Sierra</code>に対応していない。が<code>sierra</code>向けに開発中の<code>karabiner elements</code>でで設定できた。以下、設定。</p>
+<ul>
+<li>外付けキーボード接続時にbuilt-inキーボードを無効</li>
+<li>right_altキーに存在しないF13を割り当てる</li>
+</ul>
+<p>OS環境設定&gt;キーボードからaltを入力切替に割り当てた。</p>
+<h2 id="Macで隠しファイルを表示する"><a href="#Macで隠しファイルを表示する" class="headerlink" title="Macで隠しファイルを表示する"></a>Macで隠しファイルを表示する</h2><p><code>.gitignore</code>などの隠しファイルを<code>Finder</code>で表示させる。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ defaults write com.apple.finder AppleShowAllFiles TRUE</span><br><span class="line">$ defaults <span class="built_in">read</span> com.apple.finder AppleShowAllFiles</span><br><span class="line">&gt;&gt; TRUE</span><br><span class="line">$ killall Finder</span><br></pre></td></tr></table></figure>
+<p><code>sierra</code>からは<code>.DS_Store</code>が表示されない？</p>
+<h2 id="CL環境を作る"><a href="#CL環境を作る" class="headerlink" title="CL環境を作る"></a>CL環境を作る</h2><p>参考: iTerm2 と zsh のインストールと基本的な設定( <a href="http://qiita.com/bird_tummy/items/bd063f0d7eb18287fec1" target="_blank" rel="noopener">iTerm2 と zsh のインストールと基本的な設定 - Qiita</a> )</p>
+<h3 id="ターミナルの代わりにIterm2をインストール"><a href="#ターミナルの代わりにIterm2をインストール" class="headerlink" title="ターミナルの代わりにIterm2をインストール"></a>ターミナルの代わりにIterm2をインストール</h3><p><code>Preferences&gt;General&gt;Preferences</code>から設定ファイルを移行できる。</p>
+<h3 id="zshのインストール"><a href="#zshのインストール" class="headerlink" title="zshのインストール"></a>zshのインストール</h3><p><code>Zsh</code>のインストールに<code>Homebrew</code>が必要。<code>homebrew</code>のインストールに<code>x-code</code>の<code>command line tools</code>が必要。</p>
+<p><code>x-code</code>を<code>app store</code>からインストールして<code>$ xcode-select --install</code>で<code>command line tools</code>をインストールする。</p>
+<p><code>homebrew</code>( <a href="http://brew.sh/" target="_blank" rel="noopener">Homebrew — The missing package manager for macOS</a> )をインストールする。<br><code>$ ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</code><br>事前に<code>xcode</code>のライセンスに同意する必要がある、指示に従ってclから可能。インストールが済んだら<code>$brew doctor</code>でエラーをチェックしとく。</p>
+<p>Zshとoh-my-zshをインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ brew install zsh</span><br><span class="line">curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh</span><br></pre></td></tr></table></figure>
+<p>とりあえずzshのインストールはこれで完成。windowsと違って環境変数とかいじらないので楽。前の環境から<code>.zshrc</code>をお好みでコピーする。</p>
+<h2 id="gitのインストール"><a href="#gitのインストール" class="headerlink" title="gitのインストール"></a>gitのインストール</h2><p>Macには最初からgitが入っているので<code>$ brew install git</code>でアップデートする。<code>git config</code>の移行はルートフォルダの<code>.gitconfig</code>を移すだけ。</p>
+<h3 id="githubの設定"><a href="#githubの設定" class="headerlink" title="githubの設定"></a>githubの設定</h3><p>前に書いたメモを参照: <a href="http://hikonaz.com/2016/08/githubhubhub/" target="_blank" rel="noopener">コマンドラインからgithubを操作したい | hikonaz blog</a></p>
+<h2 id="nodeのインストール"><a href="#nodeのインストール" class="headerlink" title="nodeのインストール"></a>nodeのインストール</h2><p>Node Version Manager - <a href="https://github.com/creationix/nvm" target="_blank" rel="noopener">https://github.com/creationix/nvm</a> をインストールする。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash</span><br></pre></td></tr></table></figure></p>
+<p><code>.zshrc</code>から<code>nvm</code>にパスを通す。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> NVM_DIR=“<span class="variable">$HOME</span>/.nvm”</span><br><span class="line">$ [ -s “<span class="variable">$NVM_DIR</span>/nvm.sh” ] &amp;&amp; . “<span class="variable">$NVM_DIR</span>/nvm.sh” <span class="comment"># This loads nvm</span></span><br></pre></td></tr></table></figure>
+<p>Nodeをインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ nvm install v6.9.4</span><br><span class="line">$ nvm use v6.9.4</span><br><span class="line"><span class="comment"># ↓インストールできているか確認</span></span><br><span class="line">$ node -v</span><br><span class="line">$ npm -v</span><br></pre></td></tr></table></figure>
+<h2 id="MAMPの移行"><a href="#MAMPの移行" class="headerlink" title="MAMPの移行"></a>MAMPの移行</h2><p>Macの設定とは直接関係ないけれど、 作業途中のwordpressプロジェクトも移行する。一番めんどくさそうだと思ったけどわりと簡単だった。イカ手順。</p>
+<ol>
+<li>新MAMP上にWodpressをインストールする</li>
+<li>旧MAMP&gt;phpadminから該当データベースを抜き取る</li>
+<li>新MAMPの該当のデータベースを空にして2で抜き取ったデータをインポートする</li>
+<li>wp-contentを入れ替えたら完成</li>
+</ol>
+<p>多分MAMPのポートを合わせないと失敗する。</p>
+<h2 id="その他の細かい設定とか"><a href="#その他の細かい設定とか" class="headerlink" title="その他の細かい設定とか"></a>その他の細かい設定とか</h2><ul>
+<li>atomの設定: .atomを丸ごとresillio syncで同期した。</li>
+</ul>
+<h2 id="インストールしたアプリケーション"><a href="#インストールしたアプリケーション" class="headerlink" title="インストールしたアプリケーション"></a>インストールしたアプリケーション</h2><ul>
+<li>google chrome</li>
+<li>karabiner elements</li>
+<li>atom</li>
+<li>simple note</li>
+<li>Todoist</li>
+<li>caffeine</li>
+<li>mamp - <a href="https://www.mamp.info/en/" target="_blank" rel="noopener">https://www.mamp.info/en/</a></li>
+<li>Slicy</li>
+<li>Line</li>
+<li>resillio sync</li>
+<li>skype</li>
+<li>photoshop</li>
+<li>illustrator</li>
+<li>istat menu</li>
+<li>source tree</li>
+<li>tomato one</li>
+<li>express vpn</li>
+<li>iterm2 - <a href="http://iterm2.com/" target="_blank" rel="noopener">http://iterm2.com/</a></li>
+</ul>
+<h2 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h2><p>残りしなきゃいけないこと。</p>
+<ul>
+<li>safariの同期</li>
+<li>photoshopの設定同期</li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

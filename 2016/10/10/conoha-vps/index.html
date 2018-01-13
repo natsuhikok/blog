@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>conoha VPSを契約してnodeアプリのテスト環境を作った | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-10-10
+  </p>
+  <h1 class="post--title">conoha VPSを契約してnodeアプリのテスト環境を作った</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/vps/">
+            vps
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/linux/">
+            linux
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p>ローカル環境で作っていたファイルを公開（テスト）するために、VPSを契約してみた。</p>
+<h2 id="なぜconoha-VPSを選んだか"><a href="#なぜconoha-VPSを選んだか" class="headerlink" title="なぜconoha VPSを選んだか"></a>なぜconoha VPSを選んだか</h2><p>herokuのようなツールと迷ったけどLinuxを触れる習慣がほしかたったのでconoha VPSを契約してみた。<br>サクラVPSも選択肢にあったけど、大きな違いはなさそうだったので何となくconohaを選んだ。深い意味はない。</p>
+<h2 id="conohaの契約〜サーバーを建てる"><a href="#conohaの契約〜サーバーを建てる" class="headerlink" title="conohaの契約〜サーバーを建てる"></a>conohaの契約〜サーバーを建てる</h2><p>申し込みをするを選んで進んで行くだけですぐサーバーを立ち上げるとこまでいける。ほぼ待ち時間なし。</p>
+<p>若干迷ったのはSMS認証。契約したタイミングでタイに滞在していたので日本のSMSは受信できない。<br>タイの携帯と住所で登録しようと思ったのだが国リストにタイの選択肢がなかなか見つからない。<br>五十音順ではなく、国コード順になってると思われる。めちゃ不便だった。</p>
+<h2 id="サーバータイプ"><a href="#サーバータイプ" class="headerlink" title="サーバータイプ"></a>サーバータイプ</h2><p>node.jsのアプリを動かしたかったので、vpsのイメージタイプをアプリケーション&gt;MEAN stackを選択。<br>ssh接続するとMEAN.JSのwelcomeメッセージがでる。<br><a href="https://meanjs.org/" target="_blank" rel="noopener">https://meanjs.org/</a></p>
+<p>上記参照すれば何ができるかわかると思う。とりあえず、mean.jsはとくに使わない予定。単純にnode/gitなどが最初から入ってる環境がほしかった。</p>
+<h2 id="色々設定する"><a href="#色々設定する" class="headerlink" title="色々設定する"></a>色々設定する</h2><p>とりあえず最低限の設定する。最低限の定義は曖昧です。</p>
+<h3 id="ファイルをローカルのAtomで開けるようにする"><a href="#ファイルをローカルのAtomで開けるようにする" class="headerlink" title="ファイルをローカルのAtomで開けるようにする"></a>ファイルをローカルのAtomで開けるようにする</h3><p>コンソールエディタは使えないし使う気もないので、テキストエディタで開けるようにする。<br><a href="http://qiita.com/informationsea/items/d2576b1ab678965d9a02" target="_blank" rel="noopener">AtomでSSH越しのファイルを編集する</a></p>
+<h3 id="サーバーのセキュリティ設定"><a href="#サーバーのセキュリティ設定" class="headerlink" title="サーバーのセキュリティ設定"></a>サーバーのセキュリティ設定</h3><p>まったくわからないので、<a href="http://qiita.com/cocuh/items/e7c305ccffb6841d109c" target="_blank" rel="noopener">そこそこセキュアなlinuxサーバーを作る</a>を参考に、というかそのまま星4以上をやりたい。</p>
+<ul>
+<li>[x] sshポート変更</li>
+<li>[x] sshでrootにlogin出来なくする</li>
+<li>[ ] パスワード認証を切る</li>
+<li>[ ] 使わないポートを閉じる</li>
+<li>[ ] ip spoofing対策</li>
+<li>[ ] バージョンを見えなくする</li>
+<li>[ ] 不要なサービスを止める</li>
+</ul>
+<h4 id="sshでrootにlogin出来なくする"><a href="#sshでrootにlogin出来なくする" class="headerlink" title="sshでrootにlogin出来なくする"></a>sshでrootにlogin出来なくする</h4><p>まずはユーザーを作成する。<a href="http://qiita.com/Tooooomin/items/c063cee80227a5f1d95b" target="_blank" rel="noopener">Linuxにユーザーを追加する</a><br><a href="https://www.liberiangeek.net/2014/08/disable-root-ssh-logon-on-centos-7/" target="_blank" rel="noopener">Disable Root SSH Logon On CentOS 7</a></p>
+<p><code>sudo systemctl restart sshd.service</code>する。</p>
+<h4 id="sshポート変更"><a href="#sshポート変更" class="headerlink" title="sshポート変更"></a>sshポート変更</h4><p><a href="https://www.liberiangeek.net/2014/11/change-openssh-port-centos-7/" target="_blank" rel="noopener">How To Change OpenSSH Port On CentOS 7</a></p>
+<p>sshd_configのポート番号だけ変更して、<code>sudo systemctl restart sshd.service</code>したらめんどくさいことになった。</p>
+<h4 id="参考リンク"><a href="#参考リンク" class="headerlink" title="参考リンク"></a>参考リンク</h4><ul>
+<li><a href="http://qiita.com/cocuh/items/e7c305ccffb6841d109c" target="_blank" rel="noopener">そこそこセキュアなlinuxサーバーを作る</a></li>
+<li><a href="http://webkaru.net/linux/change-ssh-port/" target="_blank" rel="noopener">SSHのポート番号を変更 - SSHサーバーの設定</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

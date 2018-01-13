@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>コマンドラインからgithubを操作したい | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-08-02
+  </p>
+  <h1 class="post--title">コマンドラインからgithubを操作したい</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/cli/">
+            cli
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/github/">
+            github
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/git/">
+            git
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p>コマンドラインから<code>github</code>にレポジトリを作りたかった。<br>いちいち<code>github</code>にアクセスして<code>create repository</code>するのはめんどくさすぎた。</p>
+<h2 id="github-hub"><a href="#github-hub" class="headerlink" title="github/hub"></a>github/hub</h2><p>githubが公開している<a href="https://github.com/github/hub" target="_blank" rel="noopener">github/hub</a>を使う。</p>
+<h2 id="インストール"><a href="#インストール" class="headerlink" title="インストール"></a>インストール</h2><p>macはhomebrewから一発でインストールできるけれど、windowsへのインストールがめんどうだった。</p>
+<h3 id="macのインストール"><a href="#macのインストール" class="headerlink" title="macのインストール"></a>macのインストール</h3><p><code>$ brew install hub</code>のみ。</p>
+<h3 id="windowsのインストール"><a href="#windowsのインストール" class="headerlink" title="windowsのインストール"></a>windowsのインストール</h3><p>homebrewは使えないので<code>go lang</code>を使ってインストールする（はずだった）。<code>go</code>をインストールするところから。<br><a href="https://golang.org/doc/install" target="_blank" rel="noopener">The Go Programming Language - Getting Started</a>からwindows用インストールして。<code>hub</code>をインストールする。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://github.com/github/hub.git</span><br><span class="line">$ <span class="built_in">cd</span> hub</span><br><span class="line">$ ./script/build -o ~/bin/hub</span><br></pre></td></tr></table></figure>
+<p><code>go path</code>(<code>~/bin/hub</code>の部分)はどこでもいいはず。</p>
+<p>なぜかパスワードを要求されるところで<code>Exception</code>がでてうまくいかなかった。<br>ルートにある<code>bun/hub</code>を削除して、<a href="https://github.com/github/hub/releases" target="_blank" rel="noopener">windows用の実行ファイル(<code>bin/hub.exe</code>)</a>に置き換えたら動いた。<br>好きならところに<code>bin/hub.exe</code>を設置してエイリアスを入れるだけでよかったのかも。</p>
+<h2 id="SSH接続の設定"><a href="#SSH接続の設定" class="headerlink" title="SSH接続の設定"></a>SSH接続の設定</h2><p>ssh接続が必要になるので、ssh keyを作成してgithubに教える必要がある。</p>
+<p>keyの作成手順は、windows/mac共通で<code>$ ssh-keygen</code>するだけ。エンターを３回押すとルートの<code>.ssh</code>に<code>id_rsa</code>と<code>id_rsa.pub</code>が生成される。すでに別のsshキーを使っている場合やパスワードを設定したい場合は、<code>$ ssh-keygen</code>で指示に従って適当に設定する。</p>
+<p>github側の設定は<code>setting &gt; SSH and GPG keys &gt; new ssh key</code>から<code>id_ras.pub</code>の中身をコピペする。タイトルは任意のもの。</p>
+<h2 id="コマンド"><a href="#コマンド" class="headerlink" title="コマンド"></a>コマンド</h2><p>ぼくが使いたかったのはレポジトリを作成だけなんだけれど。<br>他にも便利そうなコマンドがあった。</p>
+<p>今いるディレクトリのgithubレポジトリをブラウザで開く。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hub browse</span><br><span class="line">$ hub browse [user_name] <span class="comment"># ユーザーページを表示</span></span><br></pre></td></tr></table></figure>
+<p>今いるディレクトリのgithubレポジトリを作成してpushする。originの設定もしてくれる。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hub create</span><br><span class="line">$ hub create -p <span class="comment"># private repository</span></span><br></pre></td></tr></table></figure>
+<h2 id="課題"><a href="#課題" class="headerlink" title="課題"></a>課題</h2><ul>
+<li><del>プライベートレポジトリも作りたい</del></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

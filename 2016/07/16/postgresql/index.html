@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  
+  <title>node.js &amp; postgreSQL | hikonaz.me</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="natsuhiko">
+  <link rel="stylesheet" href="/blog/css/style.css">
+</head>
+<body>
+  <header class="l-header">
+  <div class="l-header--inner">
+    <p class="fnt-title">Hikonaz.me</p>
+    <nav>
+      <ul class="ListNavHeader">
+        <li class="ListNavHeader--item">
+          <a href=/blog/>Index</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href=/blog/archives>Archives</a>
+        </li>
+        <li class="ListNavHeader--item">
+          <a href="http://hikonaz.me">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="l-main">
+    <article class="post">
+  <p class="post--date">
+    2016-07-16
+  </p>
+  <h1 class="post--title">node.js &amp; postgreSQL</h1>
+  
+    <ul class="tag-list">
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/node-js/">
+            node.js
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/postgreSQL/">
+            postgreSQL
+          </a>
+        </li>
+    
+        <li class="tag-list-item">
+          <a href="/blog/tags/database/">
+            database
+          </a>
+        </li>
+    
+    </ul>
+  
+  <div class="post--content">
+    <p><code>postgreSQL</code>を触ってみた。<code>node.js</code>といえば<code>mongoDB</code>という安易な考えで、データベースを選んでいたけれど、ふと<code>SQL</code>のほうがいいんじゃないと思った。<br>ちなみに、オブジェクトを雑に突っ込める<code>mongoDB</code>は軽くいじる分には楽でよかった。</p>
+<h2 id="windowsにpostgreSQLをインストールする"><a href="#windowsにpostgreSQLをインストールする" class="headerlink" title="windowsにpostgreSQLをインストールする"></a>windowsにpostgreSQLをインストールする</h2><p><a href="https://www.postgresql.org/" target="_blank" rel="noopener">公式サイト</a>からインストーラーをダウンロードしてインストールするだけ。<br>インストール後に<code>Stack Builder</code>とかいう追加アプリケーションをインストールするアプリケーションが起動するのだけれど、無視していいっぽい。</p>
+<h2 id="macにpostgreSQLをインストールする"><a href="#macにpostgreSQLをインストールする" class="headerlink" title="macにpostgreSQLをインストールする"></a>macにpostgreSQLをインストールする</h2><p><a href="http://postgresapp.com" target="_blank" rel="noopener"><code>Postgres.app</code>(http://postgresapp.com)</a>を使うのが良さそう。<br>GUIアプリは、<a href="https://eggerapps.at/postico/" target="_blank" rel="noopener"><code>Postico</code>(https://eggerapps.at/postico/)</a>がよさげ。</p>
+<h2 id="コマンド"><a href="#コマンド" class="headerlink" title="コマンド"></a>コマンド</h2><p>使いそうなコマンドとか。<br>デフォルトのロールは<code>postgres</code>。ロールという名称が謎だけど、ユーザー名的なもののよう。</p>
+<p>接続する。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql</span><br><span class="line">$ psql -U [role_name]</span><br><span class="line">$ psql -U [role_name] -d [database_name]</span><br><span class="line"><span class="comment">## 他のデータベースに接続しなおす</span></span><br><span class="line">\connect [database_name]</span><br></pre></td></tr></table></figure></p>
+<p>表示する。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">## ロール一覧</span></span><br><span class="line">\du</span><br><span class="line"><span class="comment">## テーブル一覧</span></span><br><span class="line">\d</span><br><span class="line"><span class="comment">## テーブルのフィールド一覧</span></span><br><span class="line">\d [table_name]</span><br><span class="line"><span class="comment">## データベースの一覧</span></span><br><span class="line">\l</span><br></pre></td></tr></table></figure></p>
+<p>作成・削除。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">## データベースの作成</span></span><br><span class="line">create database [database_name];</span><br><span class="line"><span class="comment">## テーブル追加・削除</span></span><br><span class="line">create table [table_name];</span><br><span class="line">drop table [table_name];</span><br></pre></td></tr></table></figure></p>
+<h2 id="node-jsからpostgreSQLを使う"><a href="#node-jsからpostgreSQLを使う" class="headerlink" title="node.jsからpostgreSQLを使う"></a>node.jsからpostgreSQLを使う</h2><p><code>pg</code>を使う。データベース<code>test</code>にテーブル<code>items</code>を作る。やらかさないように<code>idpass</code>は別ファイルから読み込む。</p>
+<figure class="highlight javascript"><figcaption><span>pg_with_callback.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> pg = <span class="built_in">require</span>(<span class="string">'pg'</span>);</span><br><span class="line"><span class="keyword">var</span> idpass = <span class="built_in">require</span>(<span class="string">'./idpass.js'</span>)</span><br><span class="line"><span class="keyword">var</span> db_config = &#123;</span><br><span class="line">  user: idpass.user,</span><br><span class="line">  password: idpass.password,</span><br><span class="line">  database: <span class="string">'test'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> query = <span class="string">'CREATE TABLE items(id SERIAL PRIMARY KEY, text VARCHAR(40) not null, complete BOOLEAN)'</span>;</span><br><span class="line">pg.connect(db_config, <span class="function"><span class="keyword">function</span>(<span class="params">err, client, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(err) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">console</span>.error(<span class="string">'error connection'</span>, err);</span><br><span class="line">  &#125;</span><br><span class="line">  client.query(query, <span class="function"><span class="keyword">function</span>(<span class="params">err, result</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span>(err) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">console</span>.error(<span class="string">'error insert'</span>, err);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>シンプルに<code>callback</code>を使わないとこうなる。<br><figure class="highlight javascript"><figcaption><span>pg_without_callback.js</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> pg = <span class="built_in">require</span>(<span class="string">'pg'</span>);</span><br><span class="line"><span class="keyword">var</span> idpass = <span class="built_in">require</span>(<span class="string">'./idpass.js'</span>)</span><br><span class="line"><span class="keyword">var</span> db_config = &#123;</span><br><span class="line">  user: idpass.user,</span><br><span class="line">  password: idpass.password,</span><br><span class="line">  database: <span class="string">'test'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> client = <span class="keyword">new</span> pg.Client(db_config);</span><br><span class="line">client.connect();</span><br><span class="line"><span class="keyword">var</span> query = client.query(<span class="string">'CREATE TABLE items(id SERIAL PRIMARY KEY, text VARCHAR(40) not null, complete BOOLEAN)'</span>)</span><br><span class="line">query.on(<span class="string">'end'</span>, client.end.bind(client));</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考にしたサイト"><a href="#参考にしたサイト" class="headerlink" title="参考にしたサイト"></a>参考にしたサイト</h2><ul>
+<li><a href="https://github.com/brianc/node-postgres/wiki" target="_blank" rel="noopener">node-postgres/wiki</a></li>
+<li><a href="https://www.npmjs.com/package/pg" target="_blank" rel="noopener">npm pg</a></li>
+<li><a href="http://mherman.org/blog/2015/02/12/postgresql-and-nodejs/#.V18bM_mLRhE" target="_blank" rel="noopener">PostgreSQL and NodeJS</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </main>
+  <footer class="l-footer">
+    <div class="l-footer--inner">
+      <p class="fnt-title">Hikonaz.me</p>
+      <nav>
+        <ul class="ListNavFooter">
+          <li class="ListNavFooter--item">
+            <a href=/blog/>Index</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href=/blog/archives>Archives</a>
+          </li>
+          <li class="ListNavFooter--item">
+            <a href="http://hikonaz.me">About</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
