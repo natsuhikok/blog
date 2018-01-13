@@ -70,5 +70,5 @@ theme: blog-theme-2017
 deploy:
   type: git
   repo: git@github.com:natsuhikok/blog
-  branch: master
+  branch: gh-pages
   message: "Updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
